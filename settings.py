@@ -36,12 +36,14 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 
 # Enable reads (GET), edits (PATCH) and deletes of individual items
 # (defaults to read-only item access).
-ITEM_METHODS = ['GET', 'PATCH', 'DELETE']
+ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
 
 # We enable standard client cache directives for all resources exposed by the
 # API. We can always override these global settings later.
 CACHE_CONTROL = 'max-age=20'
 CACHE_EXPIRES = 20
+# Dont use etag for version document control
+IF_MATCH = False
 
 # Our API will expose two resources (MongoDB collections): 'people' and
 # 'works'. In order to allow for proper data validation, we define beaviour
@@ -128,9 +130,141 @@ works = {
     }
 }
 
+profiles = {
+
+    'schema':{
+
+
+        'nameUser' : {
+            'type' : 'string',
+            'required': True,
+        },
+
+        'doB': {
+            'type': 'datetime',
+            'required': True,
+        },
+        'imageUser' : {
+            'type' :'media',
+
+        },
+        'location' :{
+            'type': 'dict',
+            'schema': {
+                'type': {'type': 'string'},
+                'color': {'type': 'string'},
+                'latlngs':{'type': 'point'},
+                'radius': {'type' : 'number'},
+            },
+        },
+        'sports': {'type': 'string'},
+
+        'Followers':{'type':'list',
+                     'schema' : {'type': 'integer'},
+        },
+
+        'Followings':{'type':'list',
+                     'schema' : {'type': 'integer'},
+        },
+
+
+        'iWhSpots': {'type':'list',
+                     'items':{
+                                   'idSpot' : {'type': 'objectid',
+                                               'data_relation': {
+                                                    'resource': 'spots',
+                                                    'field': '_id',
+                                                    'embeddable': True
+                                                    },
+                                               },
+                                   'dateiWh' : {'type': 'datetime'},
+                    },
+        },
+
+#        'favoriteSpots':{'type':'list',
+#                        'items':{
+#                                        'idSpot' : {'type': 'objectid',
+#                                                    'data_relation': {
+#                                                            'resource': 'spots',
+#                                                            'field': '_id',
+#                                                            'embeddable': True
+#                                                            },
+#                                                    },
+#                                        'dateiWh' : {'type': 'datetime'},
+#
+#                        },
+#        },
+    }
+}
+
+spots = {
+
+    'schema':{
+
+        'idUser' : {'type': 'objectid',
+                    'data_relation': {
+                        'resource': 'profiles',
+                        'field': '_id',
+                        'embeddable': True
+                         },
+        },
+
+        'dateCreation': {
+            'type': 'datetime',
+        },
+        'ImageSpot' : {'type':'list',
+                       'schema' : {'type' :'media'},
+
+        },
+        'location' :{
+            'type': 'dict',
+            'schema': {
+                'type': {'type': 'string'},
+                'color': {'type': 'string'},
+                'latlngs':{'type': 'point'},
+                'radius': {'type' : 'number'},
+            },
+        },
+        'tags': {'type': 'string'},
+        'description': {'type': 'string'},
+        'likeUsers':{'type':'list',
+                     'schema' : {'type': 'string'},
+        },
+
+        'iWhUsers':{'type':'list',
+                     'schema' : {'type': 'string'},
+        },
+
+
+        'comments': {'type':'list',
+                     'items':{
+                                    'idUser' : {'type': 'string',
+#                                   'idUser' : {'type': 'objectid',
+#                                               'data_relation': {
+#                                                    'resource': 'profiles',
+#                                                    'field': '_id',
+#                                                    'embeddable': True
+#                                                    },
+                                               },
+                                   'comment' : {'type': 'string'},
+                    },
+        },
+         'sports': {'type':'list',
+                     'items':{
+                         'category' : {'type': 'string'},
+                         'sport': {'type': 'string'},
+                         'dificulty': {'type': 'string'},
+                    },
+        },
+
+    }
+
+}
 # The DOMAIN dict explains which resources will be available and how they will
 # be accessible to the API consumer.
 DOMAIN = {
     'people': people,
     'works': works,
+    'profiles': profiles,
+    'spots': spots,
 }

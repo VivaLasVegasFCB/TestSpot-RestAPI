@@ -14,9 +14,10 @@
     :copyright: (c) 2015 by Nicola Iarocci.
     :license: BSD, see LICENSE for more details.
 """
-
+import datetime
 import os
 from eve import Eve
+
 
 # Heroku support: bind to PORT if defined, otherwise default to 5000.
 if 'PORT' in os.environ:
@@ -28,7 +29,30 @@ else:
     port = 5000
     host = '127.0.0.1'
 
+
+####################
+# logic application #
+####################
+def after_insert_spot(items):
+    print 'About to store items to "%s" ' % items
+    items.append('dateCreation : Wed, 21 Nov 2012 16:04:56 GMT')
+    print 'About to store items [ with dateCreation filed] to "%s" ' % items
+
+def before_insert_spot(resource):
+     print 'About resource items to "%s" ' % resource
+#     resource.form('dateCreation','Wed, 21 Nov 2012 16:04:56 GMT')
+     print 'About resource items to "%s" ' % resource
+
+
+def post_post_spots(request):
+    print 'About to store request  "%s" ' % request
+
+# Run app
 app = Eve()
+
+#app.on_inserted_spots += after_insert_spot
+app.on_insert_spots += before_insert_spot
+#app.on_pre_POST_spots += post_post_spots
 
 
 @app.after_request
@@ -38,4 +62,5 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-    app.run(host=host, port=port)
+    app.debug = True
+    app.run(host=host, port=port, debug = True)
